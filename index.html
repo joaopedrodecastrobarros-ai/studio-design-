@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Estúdio de Design</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#f8f7f4;min-height:100vh}
+input,textarea{font-family:inherit;outline:none}
+input:focus,textarea:focus{border-color:#1a1a1a!important}
+button{cursor:pointer;font-family:inherit}
+.header{background:#fff;border-bottom:0.5px solid #e5e3dc;padding:0 2rem}
+.header-inner{max-width:980px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;height:60px}
+.logo{display:flex;align-items:center;gap:10px}
+.logo-box{width:28px;height:28px;background:#1a1a1a;border-radius:6px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:13px;font-weight:700}
+.nav{display:flex;gap:6px}
+.nav-btn{padding:6px 14px;border-radius:8px;border:0.5px solid #d4d2ca;background:transparent;font-size:13px;color:#6b6a65}
+.nav-btn.active{background:#1a1a1a;color:#fff;border-color:#1a1a1a;font-weight:500}
+.main{max-width:980px;margin:0 auto;padding:2rem}
+.card{background:#fff;border:0.5px solid #e5e3dc;border-radius:12px;padding:1.5rem}
+.card-sm{background:#fff;border:0.5px solid #e5e3dc;border-radius:8px;padding:0.75rem}
+.lbl{display:block;font-size:12px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
+.inp{width:100%;padding:9px 12px;border-radius:8px;border:0.5px solid #d4d2ca;font-size:14px;background:#fafaf8}
+.textarea{width:100%;padding:9px 12px;border-radius:8px;border:0.5px solid #d4d2ca;font-size:14px;background:#fafaf8;resize:vertical;min-height:100px}
+.btn-p{padding:9px 20px;border-radius:8px;border:none;background:#1a1a1a;color:#fff;font-size:14px;font-weight:500}
+.btn-s{padding:9px 20px;border-radius:8px;border:0.5px solid #d4d2ca;background:transparent;font-size:14px;color:#6b6a65}
+.btn-g{padding:9px 20px;border-radius:8px;border:none;background:#B8922A;color:#fff;font-size:14px;font-weight:600}
+.btn-sm{padding:5px 12px;font-size:12px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.full{grid-column:1/-1}
+.tab{display:none}
+.tab.active{display:block}
+.seg-btn{padding:6px 14px;border-radius:20px;font-size:13px;border:0.5px solid #d4d2ca;background:transparent;color:#6b6a65}
+.seg-btn.on{background:#E6F1FB;color:#185FA5;border-color:transparent;font-weight:500}
+.badge-ok{font-size:11px;background:#E1F5EE;color:#0F6E56;padding:2px 8px;border-radius:20px;font-weight:500}
+.badge-no{font-size:11px;background:#f0f0ec;color:#888;padding:2px 8px;border-radius:20px}
+.ok-msg{background:#E1F5EE;color:#0F6E56;border:0.5px solid #5DCAA5;border-radius:8px;padding:10px 14px;font-size:13px;margin-top:14px;display:none}
+.err-msg{background:#FCEBEB;color:#A32D2D;border:0.5px solid #F09595;border-radius:8px;padding:10px 14px;font-size:13px}
+.avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:600;flex-shrink:0}
+.dot{width:14px;height:14px;border-radius:3px;border:0.5px solid rgba(0,0,0,0.1)}
+.swatch{width:36px;height:36px;border-radius:6px;border:0.5px solid rgba(0,0,0,0.1);margin-bottom:4px}
+.chip{display:inline-block;font-size:12px;background:#f0f0ec;color:#555;padding:3px 10px;border-radius:20px}
+.fmt-btn{flex:1;padding:12px 8px;border-radius:8px;border:0.5px solid #d4d2ca;background:transparent;color:#6b6a65;text-align:center}
+.fmt-btn.on{border-color:#B8922A;background:#FEF9EE;color:#B8922A;font-weight:600}
+.p-opt{padding:8px 12px;border-radius:8px;font-size:13px;border:0.5px solid #e5e3dc;background:#fafaf8;color:#555;text-align:left;width:100%;margin-bottom:6px}
+.p-opt.on{background:#1a1a1a;color:#fff;border-color:#1a1a1a}
+.preview-box{background:#e8e8e4;border-radius:8px;padding:16px;display:flex;justify-content:center;align-items:center;min-height:300px}
+.gen-layout{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem}
+.flex-end{display:flex;justify-content:flex-end;gap:10px;margin-top:1.25rem}
+.flex-row{display:flex;align-items:center;gap:12px}
+.analysis-box{margin-top:1.5rem;background:#fafaf8;border:0.5px solid #e5e3dc;border-radius:10px;padding:1.25rem}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">
+      <div class="logo-box">S</div>
+      <span style="font-weight:600;font-size:15px;color:#1a1a1a">Estúdio de Design</span>
+    </div>
+    <div class="nav">
+      <button class="nav-btn active" onclick="showTab('clientes')">Clientes</button>
+      <button class="nav-btn" onclick="showTab('cadastrar')">+ Novo cliente</button>
+      <button class="nav-btn" onclick="showTab('config')">API</button>
+    </div>
+  </div>
+</div>
+
+<div class="main">
+
+  <div id="tab-config" class="tab">
+    <p style="font-size:20px;font-weight:600;color:#1a1a1a;margin:0 0 4px">Configuração</p>
+    <p style="font-size:13px;color:#888;margin:0 0 1.5rem">Sua chave fica salva apenas no seu navegador</p>
+    <div class="card">
+      <label class="lbl">Anthropic API Key</label>
+      <div style="display:flex;gap:10px">
+        <input type="password" id="apiKeyInput" class="inp" placeholder="sk-ant-..." style="flex:1"/>
+        <button class="btn-p" onclick="saveApiKey()">Salvar</button>
+      </div>
+      <p id="apiKeyMsg" style="font-size:13px;color:#0F6E56;margin-top:10px;display:none">Chave salva neste navegador</p>
+      <p style="font-size:12px;color:#aaa;margin-top:12px;line-height:1.6">Usada para analisar clientes e gerar designs. Armazenada localmente.</p>
+    </div>
+  </div>
+
+  <div id="tab-clientes" class="tab active">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1.25rem">
+      <div>
+        <p style="font-size:20px;font-weight:600;color:#1a1a1a;margin:0">Clientes</p>
+        <p id="clientCount" style="font-size:13px;color:#888;margin:4px 0 0">Carregando...</p>
+      </div>
+      <input id="searchInput" class="inp" placeholder="Buscar..." style="width:200px" oninput="renderClientes()"/>
+    </div>
+    <div id="clientList"></div>
+  </div>
+
+  <div id="tab-cadastrar" class="tab">
+    <p style="font-size:20px;font-weight:600;color:#1a1a1a;margin:0 0 4px">Novo cliente</p>
+    <p style="font-size:13px;color:#888;margin:0 0 1.5rem">Preencha e deixe a IA criar o perfil visual automaticamente</p>
+    <div class="card">
+      <div class="grid2">
+        <div><label class="lbl">Nome da empresa *</label><input id="fNome" class="inp" placeholder="Ex: Clínica Bella Pele"/></div>
+        <div><label class="lbl">Cidade / Estado</label><input id="fCidade" class="inp" placeholder="Ex: Goiânia, GO"/></div>
+        <div><label class="lbl">Site</label><input id="fSite" class="inp" placeholder="https://empresa.com.br"/></div>
+        <div><label class="lbl">Instagram</label><input id="fIg" class="inp" placeholder="@nomedaempresa"/></div>
+        <div class="full"><label class="lbl">Segmento</label><div id="segContainer" style="display:flex;flex-wrap:wrap;gap:8px"></div></div>
+        <div class="full"><label class="lbl">Sobre a empresa</label><textarea id="fSobre" class="textarea" placeholder="Descreva o que a empresa faz, público-alvo, diferenciais..."></textarea></div>
+      </div>
+      <div class="analysis-box">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <p style="font-weight:600;font-size:14px;color:#1a1a1a;margin:0">Analise de identidade visual com IA</p>
+            <p style="font-size:12px;color:#888;margin:4px 0 0">Define paleta, tipografia, tom e estilo da marca</p>
+          </div>
+          <button class="btn-g" onclick="analyzeClient()" id="analyzeBtn" style="margin-left:16px;flex-shrink:0">Analisar marca</button>
+        </div>
+        <div id="analyzeLoading" style="display:none;text-align:center;padding:1.5rem;color:#888;font-size:13px">Estudando a identidade visual...</div>
+        <div id="analyzeResult" style="display:none;margin-top:16px"></div>
+      </div>
+      <div id="saveOk" class="ok-msg">Cliente salvo com sucesso!</div>
+      <div class="flex-end">
+        <button class="btn-s" onclick="clearForm()">Limpar</button>
+        <button class="btn-p" onclick="saveCliente()" id="saveBtn">Salvar cliente</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="tab-gerar" class="tab">
+    <div class="flex-row" style="margin-bottom:1.5rem">
+      <button class="btn-s btn-sm" onclick="showTab('clientes')">Voltar</button>
+      <div>
+        <p style="font-size:20px;font-weight:600;color:#1a1a1a;margin:0" id="genTitle">Design</p>
+        <p id="genSub" style="font-size:13px;color:#888;margin:4px 0 0"></p>
+      </div>
+    </div>
+    <div id="perfilBar" style="display:none;margin-bottom:1.25rem"></div>
+    <div class="gen-layout">
+      <div style="display:flex;flex-direction:column;gap:1.25rem">
+        <div class="card">
+          <label class="lbl">Formato</label>
+          <div style="display:flex;gap:10px">
+            <button class="fmt-btn on" id="fmt-feed" onclick="setFormato('feed')">
+              <svg width="24" height="24" viewBox="0 0 24 24" style="display:block;margin:0 auto 4px"><rect x="2" y="2" width="20" height="20" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              <div style="font-size:13px">Feed</div><div style="font-size:11px;opacity:.7">1080x1080</div>
+            </button>
+            <button class="fmt-btn" id="fmt-story" onclick="setFormato('story')">
+              <svg width="16" height="24" viewBox="0 0 16 24" style="display:block;margin:0 auto 4px"><rect x="1" y="1" width="14" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              <div style="font-size:13px">Stories</div><div style="font-size:11px;opacity:.7">1080x1920</div>
+            </button>
+            <button class="fmt-btn" id="fmt-retrato" onclick="setFormato('retrato')">
+              <svg width="20" height="24" viewBox="0 0 20 24" style="display:block;margin:0 auto 4px"><rect x="1" y="1" width="18" height="22" rx="3" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>
+              <div style="font-size:13px">Retrato</div><div style="font-size:11px;opacity:.7">1080x1350</div>
+            </button>
+          </div>
+        </div>
+        <div class="card">
+          <label class="lbl">Sugestoes rapidas</label>
+          <div id="promptSugg"></div>
+        </div>
+        <div class="card">
+          <label class="lbl">Seu prompt</label>
+          <textarea id="dPrompt" class="textarea" placeholder="Descreva o design..."></textarea>
+          <button class="btn-g" style="width:100%;margin-top:12px;font-size:15px;padding:12px" onclick="generateDesign()" id="genBtn">Gerar design</button>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="min-height:420px;display:flex;flex-direction:column;align-items:center;justify-content:center">
+          <div id="pvEmpty" style="text-align:center;color:#aaa">
+            <div style="font-size:40px;margin-bottom:12px">+</div>
+            <p style="font-size:14px;color:#888">O design aparecera aqui</p>
+            <p style="font-size:12px;color:#aaa;margin-top:4px">Escolha o formato e escreva o prompt</p>
+          </div>
+          <div id="pvLoad" style="display:none;text-align:center;color:#888">
+            <p style="font-size:14px;font-weight:500">Criando design com IA...</p>
+            <p style="font-size:12px;color:#aaa;margin-top:6px">Pode levar alguns segundos</p>
+          </div>
+          <div id="pvErr" style="display:none;width:100%"></div>
+          <div id="pvRes" style="display:none;width:100%">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <p id="pvLabel" style="font-weight:600;font-size:14px;color:#1a1a1a;margin:0"></p>
+              <div style="display:flex;gap:8px">
+                <button class="btn-s btn-sm" onclick="generateDesign()">Regerar</button>
+                <button class="btn-p btn-sm" onclick="downloadSVG()">Baixar SVG</button>
+              </div>
+            </div>
+            <div class="preview-box" id="pvContainer"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SUPABASE_URL = 'COLOQUE_SUA_URL_AQUI'
+const SUPABASE_KEY = 'COLOQUE_SUA_CHAVE_AQUI'
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY)
+
+const SEGS = ['Saude e Estetica','Alimentacao','Moda e Varejo','Advocacia e Juridico','Arquitetura e Design','Educacao','Imobiliaria','Tecnologia','Outro']
+const AVATARS = [{bg:'#E6F1FB',tx:'#185FA5'},{bg:'#E1F5EE',tx:'#0F6E56'},{bg:'#FAECE7',tx:'#993C1D'},{bg:'#FAEEDA',tx:'#854F0B'},{bg:'#FBEAF0',tx:'#993556'}]
+const FMTS = {feed:{w:1080,h:1080,lb:'Feed'},story:{w:1080,h:1920,lb:'Stories'},retrato:{w:1080,h:1350,lb:'Retrato'}}
+const PROMPTS = ['Post de promocao especial com destaque no desconto','Card de depoimento de cliente satisfeito','Destaque do servico ou produto principal','Banner institucional com os diferenciais','Dica ou conteudo educativo do segmento','Lancamento de produto ou servico novo','Post de data comemorativa','Apresentacao da equipe e bastidores']
+
+let clientes=[], segs=[], client=null, fmt='feed', svg=null, analysis=null
+
+function getKey(){return localStorage.getItem('anthropic_api_key')||''}
+function saveApiKey(){
+  const k=document.getElementById('apiKeyInput').value.trim()
+  localStorage.setItem('anthropic_api_key',k)
+  document.getElementById('apiKeyMsg').style.display='block'
+}
+
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(e=>e.classList.remove('active'))
+  document.querySelectorAll('.nav-btn').forEach(e=>e.classList.remove('active'))
+  document.getElementById('tab-'+t).classList.add('active')
+  const btns=document.querySelectorAll('.nav-btn')
+  const map={clientes:0,cadastrar:1,config:2}
+  if(map[t]!==undefined)btns[map[t]].classList.add('active')
+  if(t==='clientes')renderClientes()
+}
+
+function initials(n){return n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}
+
+async function fetchClientes(){
+  const{data}=await sb.from('clientes').select('*').order('created_at',{ascending:false})
+  clientes=data||[]
+  renderClientes()
+}
+
+function renderClientes(){
+  const s=(document.getElementById('searchInput')?.value||'').toLowerCase()
+  const f=clientes.filter(c=>c.nome.toLowerCase().includes(s)||(c.segmento||'').toLowerCase().includes(s))
+  document.getElementById('clientCount').textContent=clientes.length+' na base compartilhada'
+  const el=document.getElementById('clientList')
+  if(!f.length){
+    el.innerHTML='<div style="text-align:center;padding:4rem;color:#888"><p style="font-size:32px;margin-bottom:12px">&#x1F3E2;</p><p style="font-size:14px">Nenhum cliente ainda.</p><button class="btn-p" style="margin-top:16px" onclick="showTab(\'cadastrar\')">Cadastrar cliente</button></div>'
+    return
+  }
+  el.innerHTML=f.map((c,i)=>{
+    const col=AVATARS[i%AVATARS.length]
+    let pv=null;try{pv=c.perfil_visual?JSON.parse(c.perfil_visual):null}catch(e){}
+    const dots=pv?Object.values(pv.paleta||{}).map(v=>`<div class="dot" style="background:${v}" title="${v}"></div>`).join(''):''
+    const font=pv?`<span style="font-size:11px;color:#aaa;margin-left:4px">${pv.tipografia?.display||''}</span>`:''
+    return`<div class="card" style="padding:1rem 1.25rem;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:14px">
+        <div style="display:flex;align-items:center;gap:14px">
+          <div class="avatar" style="background:${col.bg};color:${col.tx}">${initials(c.nome)}</div>
+          <div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="font-weight:600;font-size:14px;color:#1a1a1a">${c.nome}</span>
+              ${pv?'<span class="badge-ok">perfil visual</span>':'<span class="badge-no">sem perfil</span>'}
+            </div>
+            <p style="font-size:12px;color:#888;margin:3px 0 0">${[c.segmento,c.cidade].filter(Boolean).join(' · ')||'Sem segmento'}</p>
+            ${pv?`<div style="display:flex;align-items:center;gap:4px;margin-top:5px">${dots}${font}</div>`:''}
+          </div>
+        </div>
+        <button class="btn-g btn-sm" onclick="openGerar(${c.id})">Gerar design</button>
+      </div>
+    </div>`
+  }).join('')
+}
+
+function openGerar(id){
+  client=clientes.find(c=>c.id===id)
+  if(!client)return
+  document.getElementById('genTitle').textContent='Design - '+client.nome
+  document.getElementById('genSub').textContent=[client.segmento,client.cidade].filter(Boolean).join(' · ')
+  svg=null
+  document.getElementById('dPrompt').value=''
+  setFormato('feed')
+  renderPromptSugg()
+  renderPerfilBar()
+  pvState('empty')
+  showTab('gerar')
+}
+
+function renderPerfilBar(){
+  const bar=document.getElementById('perfilBar')
+  if(!client?.perfil_visual){bar.style.display='none';return}
+  let pv=null;try{pv=JSON.parse(client.perfil_visual)}catch(e){}
+  if(!pv){bar.style.display='none';return}
+  const dots=Object.values(pv.paleta||{}).map(v=>`<div class="dot" style="background:${v}" title="${v}"></div>`).join('')
+  bar.style.display='block'
+  bar.innerHTML=`<div class="card" style="background:#fafaf8;padding:.75rem 1.25rem">
+    <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap">
+      <span style="font-size:12px;font-weight:600;color:#aaa;text-transform:uppercase;letter-spacing:.05em">Perfil visual</span>
+      <div style="display:flex;gap:5px">${dots}</div>
+      <span style="font-size:12px;color:#555">${pv.tipografia?.display||''}</span>
+      <span style="font-size:12px;color:#aaa">|</span>
+      <span style="font-size:12px;color:#555;font-style:italic">${pv.tom||''}</span>
+    </div>
+  </div>`
+}
+
+function renderPromptSugg(){
+  const cur=document.getElementById('dPrompt').value
+  document.getElementById('promptSugg').innerHTML=PROMPTS.map(p=>
+    `<button class="p-opt${cur===p?' on':''}" onclick="selPrompt('${p.replace(/'/g,"&#39;")}')">${p}</button>`
+  ).join('')
+}
+
+function selPrompt(p){document.getElementById('dPrompt').value=p;renderPromptSugg()}
+
+function setFormato(f){
+  fmt=f;svg=null;pvState('empty')
+  document.querySelectorAll('.fmt-btn').forEach(b=>b.classList.remove('on'))
+  document.getElementById('fmt-'+f).classList.add('on')
+}
+
+function pvState(s){
+  document.getElementById('pvEmpty').style.display=s==='empty'?'block':'none'
+  document.getElementById('pvLoad').style.display=s==='loading'?'block':'none'
+  document.getElementById('pvErr').style.display=s==='error'?'block':'none'
+  document.getElementById('pvRes').style.display=s==='result'?'block':'none'
+}
+
+function buildSegs(){
+  document.getElementById('segContainer').innerHTML=SEGS.map(s=>
+    `<button class="seg-btn${segs.includes(s)?' on':''}" onclick="togSeg(this,'${s}')">${s}</button>`
+  ).join('')
+}
+
+function togSeg(btn,s){
+  if(segs.includes(s))segs=segs.filter(x=>x!==s);else segs.push(s)
+  btn.classList.toggle('on')
+}
+
+async function claude(messages,system,maxTok){
+  const key=getKey()
+  if(!key)throw new Error('API Key nao configurada. Va em API.')
+  const res=await fetch('https://api.anthropic.com/v1/messages',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+    body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:maxTok||1000,system:system||undefined,messages})
+  })
+  const d=await res.json()
+  if(d.error)throw new Error(d.error.message)
+  return d.content?.[0]?.text||''
+}
+
+async function analyzeClient(){
+  const site=document.getElementById('fSite').value.trim()
+  const ig=document.getElementById('fIg').value.trim()
+  if(!site&&!ig){alert('Informe pelo menos o site ou Instagram.');return}
+  const btn=document.getElementById('analyzeBtn')
+  btn.textContent='Analisando...';btn.disabled=true
+  document.getElementById('analyzeLoading').style.display='block'
+  document.getElementById('analyzeResult').style.display='none'
+  analysis=null
+  try{
+    const nome=document.getElementById('fNome').value
+    const cidade=document.getElementById('fCidade').value
+    const sobre=document.getElementById('fSobre').value
+    const text=await claude([{role:'user',content:`Voce e um especialista senior em branding e identidade visual. Analise esta empresa e crie um perfil visual completo.
+
+DADOS:
+- Nome: ${nome||'nao informado'}
+- Site: ${site||'nao informado'}
+- Instagram: ${ig||'nao informado'}
+- Segmento: ${segs.join(', ')||'nao informado'}
+- Cidade: ${cidade||'nao informado'}
+- Descricao: ${sobre||'nao informado'}
+
+Responda APENAS com JSON puro:
+{"paleta":{"primaria":"#hex","secundaria":"#hex","acento":"#hex","fundo":"#hex","texto":"#hex"},"tipografia":{"display":"fonte Google Fonts para titulos","corpo":"fonte para texto","estilo":"descricao em 1 frase"},"tom":"tom de voz em 1 frase","personalidade":["adj1","adj2","adj3"],"estetica":"descricao da estetica em 2 frases","instrucoes_design":"instrucoes detalhadas para criar posts de Instagram desta marca"}`}],null,1200)
+    const clean=text.replace(/```json|```/g,'').trim()
+    analysis=JSON.parse(clean)
+    renderAnalysis(analysis)
+  }catch(e){alert('Erro: '+e.message)}
+  btn.textContent='Analisar marca';btn.disabled=false
+  document.getElementById('analyzeLoading').style.display='none'
+}
+
+function renderAnalysis(pv){
+  const sw=Object.entries(pv.paleta||{}).map(([k,v])=>`<div style="text-align:center"><div class="swatch" style="background:${v}"></div><div style="font-size:10px;color:#aaa">${k}</div></div>`).join('')
+  const chips=(pv.personalidade||[]).map(p=>`<span class="chip">${p}</span>`).join('')
+  document.getElementById('analyzeResult').innerHTML=`
+    <div class="grid2" style="margin-bottom:10px">
+      <div class="card-sm"><p class="lbl" style="margin-bottom:10px">Paleta de cores</p><div style="display:flex;gap:8px;flex-wrap:wrap">${sw}</div></div>
+      <div class="card-sm"><p class="lbl" style="margin-bottom:8px">Tipografia</p>
+        <p style="font-size:13px;color:#1a1a1a;margin:0 0 4px">Titulo: <strong>${pv.tipografia?.display||''}</strong></p>
+        <p style="font-size:13px;color:#1a1a1a;margin:0 0 6px">Corpo: <strong>${pv.tipografia?.corpo||''}</strong></p>
+        <p style="font-size:12px;color:#888;margin:0;font-style:italic">${pv.tipografia?.estilo||''}</p>
+      </div>
+    </div>
+    <div class="card-sm" style="margin-bottom:10px"><p class="lbl" style="margin-bottom:6px">Tom e Personalidade</p>
+      <p style="font-size:13px;color:#1a1a1a;margin:0 0 8px">${pv.tom||''}</p>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">${chips}</div>
+    </div>
+    <div class="card-sm"><p class="lbl" style="margin-bottom:6px">Estetica visual</p>
+      <p style="font-size:13px;color:#1a1a1a;margin:0;line-height:1.6">${pv.estetica||''}</p>
+    </div>
+    <p style="font-size:12px;color:#0F6E56;margin-top:10px;font-weight:500">Perfil visual sera salvo com o cliente</p>`
+  document.getElementById('analyzeResult').style.display='block'
+}
+
+async function saveCliente(){
+  const nome=document.getElementById('fNome').value.trim()
+  if(!nome){alert('Informe o nome da empresa!');return}
+  const btn=document.getElementById('saveBtn')
+  btn.textContent='Salvando...';btn.disabled=true
+  const{error}=await sb.from('clientes').insert([{
+    nome,site:document.getElementById('fSite').value.trim(),
+    instagram:document.getElementById('fIg').value.trim(),
+    cidade:document.getElementById('fCidade').value.trim(),
+    sobre:document.getElementById('fSobre').value.trim(),
+    segmento:segs.join(', '),
+    perfil_visual:analysis?JSON.stringify(analysis):null
+  }])
+  btn.textContent='Salvar cliente';btn.disabled=false
+  if(error){alert('Erro: '+error.message);return}
+  const msg=document.getElementById('saveOk')
+  msg.style.display='block';setTimeout(()=>msg.style.display='none',3000)
+  clearForm();await fetchClientes();showTab('clientes')
+}
+
+function clearForm(){
+  ['fNome','fSite','fIg','fCidade','fSobre'].forEach(id=>document.getElementById(id).value='')
+  segs=[];buildSegs();analysis=null
+  document.getElementById('analyzeResult').style.display='none'
+}
+
+async function generateDesign(){
+  const prompt=document.getElementById('dPrompt').value.trim()
+  if(!prompt){alert('Escreva um prompt primeiro.');return}
+  if(!client)return
+  pvState('loading');svg=null
+  const f=FMTS[fmt]
+  let pv=null;try{pv=client.perfil_visual?JSON.parse(client.perfil_visual):null}catch(e){}
+
+  const sys=`Voce e um designer grafico profissional especializado em criar posts de Instagram como SVG.
+REGRAS:
+1. Responda APENAS com SVG puro — comeca com <svg e termina com </svg>
+2. viewBox DEVE ser "0 0 ${f.w} ${f.h}"
+3. Use apenas: rect,circle,text,path,line,polygon,ellipse,g,defs,linearGradient,radialGradient,style
+4. Google Fonts: <defs><style>@import url('https://fonts.googleapis.com/css2?family=Nome:wght@400;700&display=swap');</style></defs>
+5. PROIBIDO tag image com src externo
+6. Design COMPLETO e profissional
+7. Use gradientes e formas geometricas
+8. Hierarquia tipografica clara`
+
+  const pTxt=pv?`
+IDENTIDADE VISUAL (siga rigorosamente):
+Cores: primaria ${pv.paleta?.primaria}, secundaria ${pv.paleta?.secundaria}, acento ${pv.paleta?.acento}, fundo ${pv.paleta?.fundo}, texto ${pv.paleta?.texto}
+Fontes: titulos ${pv.tipografia?.display}, corpo ${pv.tipografia?.corpo}
+Tom: ${pv.tom} | Personalidade: ${pv.personalidade?.join(', ')}
+Estetica: ${pv.estetica}
+Instrucoes: ${pv.instrucoes_design}`:`Segmento: ${client.segmento||''} | Cidade: ${client.cidade||''} | Sobre: ${client.sobre||''}`
+
+  const fmtTxt=fmt==='story'?'STORY vertical 1080x1920: hero no topo, texto centro, CTA base.':fmt==='retrato'?'RETRATO 4:5 1080x1350: composicao em camadas.':'FEED quadrado 1080x1080: composicao centralizada.'
+
+  try{
+    const text=await claude([{role:'user',content:`Crie um ${f.lb} de Instagram SVG ${f.w}x${f.h}px para: ${client.nome}
+${pTxt}
+PEDIDO: ${prompt}
+Instagram: ${client.instagram||''} | Site: ${client.site||''}
+Formato: ${fmtTxt}
+Apenas o SVG completo.`}],sys,4000)
+    const m=text.match(/<svg[\s\S]*<\/svg>/i)
+    if(m){svg=m[0];renderPreview()}
+    else{pvState('error');document.getElementById('pvErr').innerHTML='<div class="err-msg">Nao foi possivel gerar. Tente reformular o prompt.</div>'}
+  }catch(e){pvState('error');document.getElementById('pvErr').innerHTML=`<div class="err-msg">${e.message}</div>`}
+}
+
+function renderPreview(){
+  const f=FMTS[fmt]
+  const sc=Math.min(440/f.w,520/f.h)
+  const pw=f.w*sc,ph=f.h*sc
+  const s=svg.replace(/<svg/,`<svg width="${pw}" height="${ph}"`)
+  document.getElementById('pvLabel').textContent=`${f.lb} · ${f.w}x${f.h}`
+  document.getElementById('pvContainer').innerHTML=`<div style="width:${pw}px;height:${ph}px;border-radius:6px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.2)">${s}</div>`
+  pvState('result')
+}
+
+function downloadSVG(){
+  if(!svg)return
+  const blob=new Blob([svg],{type:'image/svg+xml'})
+  const url=URL.createObjectURL(blob)
+  const a=document.createElement('a')
+  a.href=url;a.download=`${client?.nome||'design'}-${fmt}.svg`;a.click()
+  URL.revokeObjectURL(url)
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  const k=localStorage.getItem('anthropic_api_key')
+  if(k){document.getElementById('apiKeyInput').value=k;document.getElementById('apiKeyMsg').style.display='block'}
+  buildSegs();fetchClientes();renderPromptSugg()
+})
+</script>
+</body>
+</html>
